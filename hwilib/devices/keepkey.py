@@ -4,6 +4,7 @@ from ..errors import HWWError, UNKNOWN_ERROR
 from .trezorlib.transport import enumerate_devices
 from .trezor import TrezorClient
 from ..base58 import get_xpub_fingerprint_hex
+from ..errors import common_messages, handle_errors
 
 py_enumerate = enumerate # Need to use the enumerate built-in but there's another function already named that
 
@@ -21,7 +22,8 @@ def enumerate(password=''):
         d_data['path'] = dev.get_path()
 
         client = None
-        try:
+
+        with handle_errors(common_messages["enumerate"], d_data):
             client = KeepkeyClient(d_data['path'], password)
             client.client.init_device()
             if not 'keepkey' in client.client.features.vendor:
@@ -31,12 +33,6 @@ def enumerate(password=''):
                 d_data['fingerprint'] = get_xpub_fingerprint_hex(master_xpub)
             else:
                 d_data['error'] = 'Not initialized'
-        except HWWError as e:
-            d_data['error'] = "Could not open client or get fingerprint information: " + e.get_msg()
-            d_data['code'] = e.get_code()
-        except Exception as e:
-            d_data['error'] = "Could not open client or get fingerprint information: " + str(e)
-            d_data['code'] = UNKNOWN_ERROR
 
         if client:
             client.close()
