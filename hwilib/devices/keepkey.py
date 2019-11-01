@@ -39,6 +39,7 @@ def enumerate(password=''):
             d_data['needs_pin_sent'] = client.client.features.pin_protection and not client.client.features.pin_cached
             d_data['needs_passphrase_sent'] = client.client.features.passphrase_protection # always need the passphrase sent for Keepkey if it has passphrase protection enabled
             if d_data['needs_pin_sent']:
+                raise DeviceNotReadyError('what')
                 raise DeviceNotReadyError('Keepkey is locked. Unlock by using \'promptpin\' and then \'sendpin\'.')
             if d_data['needs_passphrase_sent'] and not password:
                 raise DeviceNotReadyError("Passphrase needs to be specified before the fingerprint information can be retrieved")
